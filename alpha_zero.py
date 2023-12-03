@@ -25,7 +25,7 @@ class AlphaZeroParallel:
         # collect the memory from all the actual game play during the self play
         return_memory = []
         spGames = [SPG(self.game) for spg in range(self.args['num_parallel_games'])]
-        players = np.array([1 for i in range(self.args['num_parallel_games'])])
+        players = [1 for i in range(self.args['num_parallel_games'])]
         
         # play each of the spg to the end 
         count = 0
@@ -46,7 +46,7 @@ class AlphaZeroParallel:
             # always use the neutral perspective for the mcts
             # states: (batch_size, row_count, column_count)
             # players: (batch_size)
-            neutral_states = self.game.change_perspective(states, players[:, None, None])
+            neutral_states = self.game.change_perspective(states, np.array(players)[:, None, None])
             self.mcts.search(neutral_states, spGames)
             
             # loop from large to small so that we can remove spGames as we go
@@ -85,8 +85,10 @@ class AlphaZeroParallel:
                             hist_outcome
                         ))
                     del spGames[i]
-                # switch player turn if the game is not over
-                players[i] = self.game.get_opponent(player)
+                    del players[i]
+                else:
+                    # switch player turn if the game is not over
+                    players[i] = self.game.get_opponent(player)
 
                     
                     

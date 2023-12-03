@@ -164,7 +164,7 @@ class MCTSParallel:
         
     @torch.no_grad()
     def search(self, states, spGames: List[SPG]):
-        # states: (batch_size, row_count, column_count)
+        # states: (batch_size, row_count, column_count), neutral perspective
         # spGames: list of spGame
         policy, _ = self.model(
             torch.tensor(self.game.get_encoded_state(states), device=self.model.device)
