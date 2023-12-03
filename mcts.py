@@ -18,6 +18,20 @@ class Node:
         self.value_sum = 0
         # whether the parent turn is skipped or not
         self.skip_parent = False
+    
+    def __repr__(self) -> str:
+        # balck #, white o, empty .
+        output = ''
+        for i in range(self.game.row_count):
+            for j in range(self.game.column_count):
+                if self.state[i][j] == 1:
+                    output += '# '
+                elif self.state[i][j] == -1:
+                    output += 'o '
+                else:
+                    output += '. '
+            output += '\n'
+        return output
         
     def is_fully_expanded(self):
         return len(self.children) > 0
