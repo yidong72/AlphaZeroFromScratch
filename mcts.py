@@ -9,6 +9,8 @@ class SPG:
     """
     def __init__(self, game):
         self.state = game.get_initial_state()
+        # memory is a list of (state, improved policy, player) tuples
+        # from the root state to the end of the game
         self.memory = []
         self.root = None
         self.node = None
@@ -177,8 +179,8 @@ class MCTSParallel:
             valid_moves = self.game.get_valid_moves(states[i])
             spg_policy *= valid_moves
             spg_policy /= np.sum(spg_policy)
-            # TODO need to handle the case where all valid moves are 0
-
+            # no need to handle the case that no valid moves
+            # because the we search the states[i] which has at least one valid move
             spg.root = Node(self.game, self.args, states[i], visit_count=1)
             spg.root.expand(spg_policy)
         
