@@ -1,6 +1,17 @@
 import numpy as np
 import math
 import torch
+from typing import List
+
+
+class SPG:
+    """a class to store the state, root node, and current node of a single player game
+    """
+    def __init__(self, game):
+        self.state = game.get_initial_state()
+        self.memory = []
+        self.root = None
+        self.node = None
 
 
 class Node:
@@ -140,3 +151,92 @@ class MCTS:
             action_probs[child.action_taken] = child.visit_count
         action_probs /= np.sum(action_probs)
         return action_probs
+
+
+
+class MCTSParallel:
+    def __init__(self, game, args, model):
+        self.game = game
+        self.args = args
+        self.model = model
+        
+    @torch.no_grad()
+    def search(self, states, spGames: List[SPG]):
+        # states: (batch_size, row_count, column_count)
+        # spGames: list of spGame
+        policy, _ = self.model(
+            torch.tensor(self.game.get_encoded_state(states), device=self.model.device)
+        )
+        # policy: (batch_size, action_size)
+        policy = torch.softmax(policy, axis=1).cpu().numpy()
+        policy = (1 - self.args['dirichlet_epsilon']) * policy + self.args['dirichlet_epsilon'] \
+            * np.random.dirichlet([self.args['dirichlet_alpha']] * self.game.action_size, size=policy.shape[0])
+        
+        for i, spg in enumerate(spGames):
+            spg_policy = policy[i]
+            valid_moves = self.game.get_valid_moves(states[i])
+            spg_policy *= valid_moves
+            spg_policy /= np.sum(spg_policy)
+            # TODO need to handle the case where all valid moves are 0
+
+            spg.root = Node(self.game, self.args, states[i], visit_count=1)
+            spg.root.expand(spg_policy)
+        
+        for search in range(self.args['num_searches']):
+            # consider doing this in parallel
+            for spg in spGames:
+                spg.node = None
+                node = spg.root
+
+                while node.is_fully_expanded():
+                    node = node.select()
+                
+                # check the move done (node.action_taken) by the opponent resulting in game over or not
+                # also get the value from the perspective of the opponent
+                value, is_terminal = self.game.get_value_and_terminated(node.state, node.action_taken)
+                if not node.skip_parent:
+                    value = self.game.get_opponent_value(value)
+
+                if is_terminal:
+                    # if terminal, then backpropagate the value, and skip the expansion of the node because spg.node is None
+                    node.backpropagate(value)
+                else:
+                    # if not terminal, then expand the node in the later part of the code
+                    spg.node = node
+                    
+            # index of spGames that are expandable
+            expandable_spGames = [mappingIdx for mappingIdx in range(len(spGames)) if spGames[mappingIdx].node is not None]
+                    
+            if len(expandable_spGames) > 0:
+                # compute the batched policy and value for the expandable spGames
+
+                # get the states of the expandable spGames
+                states = np.stack([spGames[mappingIdx].node.state for mappingIdx in expandable_spGames])
+                
+                policy, value = self.model(
+                    torch.tensor(self.game.get_encoded_state(states), device=self.model.device)
+                )
+                # policy: (batch_size, action_size)
+                policy = torch.softmax(policy, axis=1).cpu().numpy()
+                # value: (batch_size, 1)
+                value = value.cpu().numpy()
+                
+            for i, mappingIdx in enumerate(expandable_spGames):
+                node = spGames[mappingIdx].node
+                spg_policy, spg_value = policy[i], value[i]
+                
+                # valid move is from the perspective of the current player (playe 1)
+                valid_moves = self.game.get_valid_moves(node.state)
+                if np.sum(valid_moves) == 0:
+                    # if no valid moves, change current node to the opponent's perspective, no need to expand
+                    # flip the state and the value
+                    node.state = self.game.change_perspective(node.state, player=-1)
+                    node.value_sum = -node.value_sum
+                    node.skip_parent = True
+                    continue
+                else:
+                    spg_policy *= valid_moves
+                    spg_policy /= np.sum(spg_policy)
+                    node.expand(spg_policy)
+
+                node.backpropagate(spg_value)
