@@ -25,13 +25,13 @@ class Othello:
             if self.check_valid_move(state, row, column, direction, player):
                 if direction == 0:
                     # up
-                    for i in range(1, row):
+                    for i in range(1, row + 1):
                         if state[row - i, column] == player:
                             break
                         state[row - i, column] = player
                 if direction == 1:
                     # up-right
-                    for i in range(1, min(row, self.column_count - column)):
+                    for i in range(1, min(row + 1, self.column_count - column)):
                         if state[row - i, column + i] == player:
                             break
                         state[row - i, column + i] = player
@@ -61,7 +61,7 @@ class Othello:
                         state[row + i, column - i] = player
                 if direction == 6:
                     # left
-                    for i in range(1, column):
+                    for i in range(1, column + 1):
                         if state[row, column - i] == player:
                             break
                         state[row, column - i] = player
@@ -90,7 +90,7 @@ class Othello:
             if row < 2:
                 return False
             if state[row - 1, column] == -player:
-                for i in range(2, row):
+                for i in range(2, row + 1):   #  i = 2, 3, ..., row
                     if state[row - i, column] == 0:
                         return False
                     if state[row - i, column] == player:
@@ -101,8 +101,8 @@ class Othello:
             if row < 2 or column >= self.column_count - 2:
                 return False
             if state[row - 1, column + 1] == -player:
-                for i in range(2, min(row, self.column_count - column)):
-                    if state[row - i, column + i] == 0:
+                for i in range(2, min(row + 1, self.column_count - column)):
+                    if state[row - i, column + i] == 0:  
                         return False
                     if state[row - i, column + i] == player:
                         return True
@@ -145,7 +145,7 @@ class Othello:
             if row >= self.row_count - 2 or column < 2:
                 return False
             if state[row + 1, column - 1] == -player:
-                for i in range(2, min(self.row_count - row, column)):
+                for i in range(2, min(self.row_count - row, column + 1)):
                     if state[row + i, column - i] == 0:
                         return False
                     if state[row + i, column - i] == player:
@@ -156,7 +156,7 @@ class Othello:
             if column < 2:
                 return False
             if state[row, column - 1] == -player:
-                for i in range(2, column):
+                for i in range(2, column + 1):
                     if state[row, column - i] == 0:
                         return False
                     if state[row, column - i] == player:
@@ -167,7 +167,7 @@ class Othello:
             if row < 2 or column < 2:
                 return False
             if state[row - 1, column - 1] == -player:
-                for i in range(2, min(row, column)):
+                for i in range(2, min(row + 1, column + 1)):
                     if state[row - i, column - i] == 0:
                         return False
                     if state[row - i, column - i] == player:
@@ -256,32 +256,34 @@ class Othello:
         return encoded_state
 
         
-tictactoe = Othello()
-player = 1
+# tictactoe = Othello()
+# player = 1
+# 
+# state = tictactoe.get_initial_state()
+# 
+# 
+# while True:
+#     print(state)
+#     valid_moves = tictactoe.get_valid_moves(state, player)
+#     print("valid_moves", [i for i in range(tictactoe.action_size) if valid_moves[i] == 1])
+#     action = int(input(f"{player}:"))
+#     
+#     if valid_moves[action] == 0:
+#         print("action not valid")
+#         continue
+#         
+#     state = tictactoe.get_next_state(state, action, player)
+#     
+#     value, is_terminal = tictactoe.get_value_and_terminated(state, action)
+#     
+#     if is_terminal:
+#         print(state)
+#         if value == 1:
+#             print(player, "won")
+#         else:
+#             print("draw")
+#         break
+#         
+#     player = tictactoe.get_opponent(player)
 
-state = tictactoe.get_initial_state()
-
-
-while True:
-    print(state)
-    valid_moves = tictactoe.get_valid_moves(state, player)
-    print("valid_moves", [i for i in range(tictactoe.action_size) if valid_moves[i] == 1])
-    action = int(input(f"{player}:"))
     
-    if valid_moves[action] == 0:
-        print("action not valid")
-        continue
-        
-    state = tictactoe.get_next_state(state, action, player)
-    
-    value, is_terminal = tictactoe.get_value_and_terminated(state, action)
-    
-    if is_terminal:
-        print(state)
-        if value == 1:
-            print(player, "won")
-        else:
-            print("draw")
-        break
-        
-    player = tictactoe.get_opponent(player)
