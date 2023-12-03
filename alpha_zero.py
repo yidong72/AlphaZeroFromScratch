@@ -1,4 +1,4 @@
-from mcts import MCTSParallel
+from mcts import MCTSParallel, SPG
 import numpy as np
 import random
 import torch
@@ -16,12 +16,21 @@ class AlphaZeroParallel:
         
 
     def selfPlay(self):
+        # for each game, start from the initial state
+        # use the mcts to search for the best action
+        # add the state, action_probs, and value to the memory
+        # play the action and get the next state
+        # switch player turn
+        # repeat until the game is over
+        # collect the memory from all the actual game play during the self play
         return_memory = []
         spGames = [SPG(self.game) for spg in range(self.args['num_parallel_games'])]
-        players = np.array([1 for i range(self.args['num_parallel_games'])])
+        players = np.array([1 for i in range(self.args['num_parallel_games'])])
         
         # play each of the spg to the end 
+        count = 0
         while len(spGames) > 0:
+            print(f'played {count} steps')
             # spg.state is on the perspective of player 1 or -1, not the neutral perspective
             states = np.stack([spg.state for spg in spGames])
 
@@ -65,6 +74,8 @@ class AlphaZeroParallel:
                     # need to update the value based on the game play at the end of the games
                     for hist_neutral_state, hist_action_probs, hist_player in spg.memory:
                         # neurtal_state is on perspective of player 1
+                        # memory always store the state from the perspective of player 1
+                        # so need to change the value to the perspective of the neutral player
                         hist_outcome = value if hist_player == player else self.game.get_opponent_value(value)
                         return_memory.append((
                             self.game.get_encoded_state(hist_neutral_state),
@@ -118,9 +129,3 @@ class AlphaZeroParallel:
             torch.save(self.model.state_dict(), f"model_{iteration}_{self.game}.pt")
             torch.save(self.optimizer.state_dict(), f"optimizer_{iteration}_{self.game}.pt")
             
-class SPG:
-    def __init__(self, game):
-        self.state = game.get_initial_state()
-        self.memory = []
-        self.root = None
-        self.node = None
