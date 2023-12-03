@@ -16,6 +16,8 @@ class Node:
         
         self.visit_count = visit_count
         self.value_sum = 0
+        # whether the parent turn is skipped or not
+        self.skip_parent = False
         
     def is_fully_expanded(self):
         return len(self.children) > 0
@@ -54,8 +56,9 @@ class Node:
     def backpropagate(self, value):
         self.value_sum += value
         self.visit_count += 1
-        
-        value = self.game.get_opponent_value(value)
+        if not self.skip_parent:
+            # only flip the value if the parent turn is not skipped
+            value = self.game.get_opponent_value(value)
         if self.parent is not None:
             self.parent.backpropagate(value)  
 
@@ -87,9 +90,14 @@ class MCTS:
 
             while node.is_fully_expanded():
                 node = node.select()
-
+            # value is from the perspective of the parent node (opponent piece), who just play the node.action_taken action.
+            # the piece on node.action_taken is the opponent's piece
+            # value is 1 if the opponent wins, -1 if the opponent loses, 0 if draw
             value, is_terminal = self.game.get_value_and_terminated(node.state, node.action_taken)
-            value = self.game.get_opponent_value(value)
+            # the value from the perspective of the current player, need to flip the sign of the value 
+            # exception, if the parent turn is skipped, then the value is from the perspective of the current player
+            if not node.skip_parent:
+                value = self.game.get_opponent_value(value)
 
             if not is_terminal:
                 policy, value = self.model(
@@ -97,12 +105,18 @@ class MCTS:
                 )
                 policy = torch.softmax(policy, axis=1).squeeze(0).cpu().numpy()
                 valid_moves = self.game.get_valid_moves(node.state)
-                policy *= valid_moves
-                policy /= np.sum(policy)
-
-                value = value.item()
-
-                node.expand(policy)
+                if np.sum(valid_moves) == 0:
+                    # if no valid moves, change current node to the opponent's perspective
+                    # flip the state and the value
+                    node.state = self.game.change_perspective(node.state, player=-1)
+                    node.value_sum = -node.value_sum
+                    node.skip_parent = True
+                    continue
+                else:
+                    policy *= valid_moves
+                    policy /= np.sum(policy)
+                    value = value.item()
+                    node.expand(policy)
 
             node.backpropagate(value)
 
