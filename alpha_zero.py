@@ -62,6 +62,7 @@ class AlphaZeroParallel:
                 spg.memory.append((spg.root.state, action_probs, player))
 
                 temperature_action_probs = action_probs ** (1 / self.args['temperature'])
+                temperature_action_probs /= np.sum(temperature_action_probs)
                 action = np.random.choice(self.game.action_size, p=temperature_action_probs) # Divide temperature_action_probs with its sum in case of an error
 
                 spg.state = self.game.get_next_state(spg.state, action, player)
