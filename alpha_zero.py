@@ -30,7 +30,8 @@ class AlphaZeroParallel:
         # play each of the spg to the end 
         count = 0
         while len(spGames) > 0:
-            print(f'played {count} steps')
+            print(f'played {count} steps, {len(spGames)}')
+            count += 1
             # spg.state is on the perspective of player 1 or -1, not the neutral perspective
             states = np.stack([spg.state for spg in spGames])
 

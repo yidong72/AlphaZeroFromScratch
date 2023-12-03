@@ -13,11 +13,23 @@ model = ResNet(game, 9, 128, device)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
 
+# args = {
+#     'C': 2,
+#     'num_searches': 1024,
+#     'num_iterations': 8,
+#     'num_selfPlay_iterations': 512,
+#     'num_parallel_games': 256,
+#     'num_epochs': 4,
+#     'batch_size': 128,
+#     'temperature': 1.25,
+#     'dirichlet_epsilon': 0.25,
+#     'dirichlet_alpha': 0.3
+# }
 args = {
     'C': 2,
-    'num_searches': 1024,
+    'num_searches': 512,
     'num_iterations': 8,
-    'num_selfPlay_iterations': 512,
+    'num_selfPlay_iterations': 256,
     'num_parallel_games': 256,
     'num_epochs': 4,
     'batch_size': 128,
@@ -25,6 +37,7 @@ args = {
     'dirichlet_epsilon': 0.25,
     'dirichlet_alpha': 0.3
 }
+
 
 alphaZero = AlphaZeroParallel(model, optimizer, game, args)
 alphaZero.learn()
