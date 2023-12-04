@@ -1,5 +1,5 @@
 from alpha_zero import AlphaZeroParallel
-from othello import Othello
+from othello_cython import Othello
 from networks import ResNet
 import torch
 import numpy as np

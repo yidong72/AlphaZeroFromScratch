@@ -247,7 +247,7 @@ cdef class Othello:
     cpdef int get_opponent_value(self, int value):
         return -value
 
-    cpdef np.ndarray change_perspective(self, np.ndarray state, int player):
+    cpdef np.ndarray change_perspective(self, np.ndarray state, np.ndarray player):
         return state * player
 
     cpdef np.ndarray get_encoded_state(self, np.ndarray state):

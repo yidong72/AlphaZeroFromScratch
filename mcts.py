@@ -73,7 +73,7 @@ class Node:
             if prob > 0:
                 child_state = self.state.copy()
                 child_state = self.game.get_next_state(child_state, action, 1)
-                child_state = self.game.change_perspective(child_state, player=-1)
+                child_state = self.game.change_perspective(child_state, player=np.array(-1))
 
                 child = Node(self.game, self.args, child_state, self, action, prob)
                 self.children.append(child)
@@ -135,7 +135,7 @@ class MCTS:
                 if np.sum(valid_moves) == 0:
                     # if no valid moves, change current node to the opponent's perspective
                     # flip the state and the value
-                    node.state = self.game.change_perspective(node.state, player=-1)
+                    node.state = self.game.change_perspective(node.state, player=np.array(-1))
                     node.value_sum = -node.value_sum
                     node.skip_parent = True
                     continue
@@ -232,7 +232,7 @@ class MCTSParallel:
                 if np.sum(valid_moves) == 0:
                     # if no valid moves, change current node to the opponent's perspective, no need to expand
                     # flip the state and the value
-                    node.state = self.game.change_perspective(node.state, player=-1)
+                    node.state = self.game.change_perspective(node.state, player=np.array(-1))
                     node.value_sum = -node.value_sum
                     node.skip_parent = True
                     continue
