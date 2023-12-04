@@ -44,9 +44,9 @@ game = Othello()
 
 args = {
     'C': 2,
-    'num_searches': 250,
+    'num_searches': 500,
     'dirichlet_epsilon': 0.1,
-    'dirichlet_alpha': 0.3,
+    'dirichlet_alpha': 0.01,
     'search': True,
     'temperature': 0,
 }

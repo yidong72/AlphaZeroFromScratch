@@ -6,6 +6,10 @@ class Othello:
         self.row_count = 8
         self.column_count = 8
         self.action_size = self.row_count * self.column_count
+    
+    def __repr__(self) -> str:
+        # name is game name + instance id
+        return f'Othello_id{id(self)}'
 
     def get_initial_state(self):
         # 0: empty, 1: black, -1: white
