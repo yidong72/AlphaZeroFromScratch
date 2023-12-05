@@ -115,10 +115,6 @@ class AlphaZeroParallel:
                     # switch player turn if the game is not over
                     players[i] = self.game.get_opponent(player)
 
-                    
-                    
-#            player = self.game.get_opponent(player)
-            
         return return_memory
                 
     def train(self, memory):
@@ -154,7 +150,9 @@ class AlphaZeroParallel:
             self.model.train()
             for epoch in trange(self.args['num_epochs']):
                 self.train(memory)
+            # save the model and optimizer state for rank 0
             
-            torch.save(self.model.state_dict(), f"model_{iteration}_{self.game}.pt")
-            torch.save(self.optimizer.state_dict(), f"optimizer_{iteration}_{self.game}.pt")
+            if self.model.device == torch.device('cuda:0'):
+                torch.save(self.model.state_dict(), f"model_{iteration}_{self.game}.pt")
+                torch.save(self.optimizer.state_dict(), f"optimizer_{iteration}_{self.game}.pt")
             
