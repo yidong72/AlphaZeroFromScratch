@@ -67,7 +67,7 @@ class Node:
         if child.visit_count == 0:
             q_value = 0
         else:
-            if not self.skip_parent:
+            if not child.skip_parent:
                 q_value = 1 - ((child.value_sum / child.visit_count) + 1) / 2
             else:
                 q_value = (child.value_sum / child.visit_count + 1) / 2

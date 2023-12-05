@@ -10,7 +10,7 @@ game = Othello()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = ResNet(game, 9, 128, device)
-model.load_state_dict(torch.load("model_7_<othello.Othello object at 0x7f3e308611e0>.pt", map_location=device))
+model.load_state_dict(torch.load("model_0_Othello_id140135011983440.pt", map_location=device))
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
 
 # args = {
