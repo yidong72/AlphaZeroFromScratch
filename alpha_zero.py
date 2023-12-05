@@ -79,11 +79,36 @@ class AlphaZeroParallel:
                         # memory always store the state from the perspective of player 1
                         # so need to change the value to the perspective of the neutral player
                         hist_outcome = value if hist_player == player else self.game.get_opponent_value(value)
+                        # let's do the augmentation here, single the board is symmetric
+                        # we can flip the board and the action_probs and rotate the board and the action_probs
                         return_memory.append((
                             self.game.get_encoded_state(hist_neutral_state),
                             hist_action_probs,
                             hist_outcome
                         ))
+
+                        # first flip the board
+                        flip_hist_neutral_state = np.flip(hist_neutral_state, axis=0)
+                        flip_hist_action_probs = np.flip(hist_action_probs.reshape(self.game.row_count, self.game.column_count)).reshape(-1)
+                        return_memory.append((self.game.get_encoded_state(flip_hist_neutral_state), 
+                                              flip_hist_action_probs, 
+                                              hist_outcome))
+
+                        # rotate the board by 90 degrees 3 times
+                        for _ in range(3):
+                            hist_neutral_state = np.rot90(hist_neutral_state)
+                            hist_action_probs = np.rot90(hist_action_probs.reshape(self.game.row_count, self.game.column_count)).reshape(-1)
+                            return_memory.append((
+                                self.game.get_encoded_state(hist_neutral_state),
+                                hist_action_probs,
+                                hist_outcome
+                            ))
+
+                            flip_hist_neutral_state = np.flip(hist_neutral_state, axis=0)
+                            flip_hist_action_probs = np.flip(hist_action_probs.reshape(self.game.row_count, self.game.column_count)).reshape(-1)
+                            return_memory.append((self.game.get_encoded_state(flip_hist_neutral_state), 
+                                                  flip_hist_action_probs, 
+                                                  hist_outcome))
                     del spGames[i]
                     del players[i]
                 else:
