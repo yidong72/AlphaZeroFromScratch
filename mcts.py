@@ -62,10 +62,15 @@ class Node:
         return best_child
     
     def get_ucb(self, child):
+        # child value_sum has different meanining from the parent value, beacuse the child value_sum is from the opponent's perspective
+        # exception, if the parent turn is skipped, then the child value_sum is from the perspective of the current player
         if child.visit_count == 0:
             q_value = 0
         else:
-            q_value = 1 - ((child.value_sum / child.visit_count) + 1) / 2
+            if not self.skip_parent:
+                q_value = 1 - ((child.value_sum / child.visit_count) + 1) / 2
+            else:
+                q_value = (child.value_sum / child.visit_count + 1) / 2
         return q_value + self.args['C'] * (math.sqrt(self.visit_count) / (child.visit_count + 1)) * child.prior
     
     def expand(self, policy):

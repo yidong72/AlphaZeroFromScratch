@@ -44,7 +44,7 @@ game = Othello()
 
 args = {
     'C': 2,
-    'num_searches': 500,
+    'num_searches': 800,
     'dirichlet_epsilon': 0.1,
     'dirichlet_alpha': 0.01,
     'search': True,
@@ -54,7 +54,7 @@ args = {
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = ResNet(game, 9, 128, device)
-model.load_state_dict(torch.load("model_7_<othello.Othello object at 0x7f3e308611e0>.pt", map_location=device))
+model.load_state_dict(torch.load("model_0_Othello_id140135011983440.pt", map_location=device))
 model.eval()
 
 if args['search']:
