@@ -6,6 +6,7 @@ import torch
 import os
 from torch import multiprocessing as mp
 from torch import distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 def init_processes(rank, world_size, backend='nccl'):
@@ -25,10 +26,9 @@ def alpha_zero_work(rank, world_size):
     device = torch.device(f'cuda:{rank}' if torch.cuda.is_available() else 'cpu')
 
     model = ResNet(game, 9, 128, device)
-#    model.load_state_dict(torch.load("model_0_Othello_id140135011983440.pt", map_location=device))
+    ddp_model = DDP(model, device_ids=[rank])
 
-    ddp_model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[rank])
-    optimizer = torch.optim.Adam(ddp_model.parameters(), lr=0.001, weight_decay=0.0001)
+    optimizer = torch.optim.AdamW(ddp_model.parameters(), lr=0.001, weight_decay=0.001)
 
     args = {
         'C': 2,
@@ -36,15 +36,14 @@ def alpha_zero_work(rank, world_size):
         'num_iterations': 10,
         'num_selfPlay_iterations': 256,
         'num_parallel_games': 256,
-        'num_epochs': 4,
+        'num_epochs': 32,
         'batch_size': 128,
-        'temperature': 1.00,
+        'temperature': 1.0,
         'dirichlet_epsilon': 0.25,
         'dirichlet_alpha': 0.3
     }
 
-
-    alphaZero = AlphaZeroParallel(model, optimizer, game, args)
+    alphaZero = AlphaZeroParallel(ddp_model, optimizer, game, args)
     alphaZero.learn()
     
     

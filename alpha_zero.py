@@ -120,8 +120,18 @@ class AlphaZeroParallel:
         return return_memory
                 
     def train(self, memory):
+        #sync dp workers by setting the pytorch barrier 
+        torch.distributed.barrier()
+        # all reduce to get the smallest memory size among all the dp workers
+        # this is to make sure that all the dp workers have the same size of memory to sample from
+        memory_size = torch.tensor(len(memory), dtype=torch.int64, device=self.model.device)
+        torch.distributed.all_reduce(memory_size, op=torch.distributed.ReduceOp.MIN)
+        min_size = memory_size.item()
+        memory = memory[:min_size]
         random.shuffle(memory)
-        for batchIdx in range(0, len(memory), self.args['batch_size']):
+        # use tqdm to show the progress bar, log the training loss to the bar
+        progress_bar = trange(0, len(memory), self.args['batch_size'])
+        for batchIdx in progress_bar:
             sample = memory[batchIdx:min(len(memory) - 1, batchIdx + self.args['batch_size'])] # Change to memory[batchIdx:batchIdx+self.args['batch_size']] in case of an error
             state, policy_targets, value_targets = zip(*sample)
             
@@ -136,7 +146,8 @@ class AlphaZeroParallel:
             policy_loss = F.cross_entropy(out_policy, policy_targets)
             value_loss = F.mse_loss(out_value, value_targets)
             loss = policy_loss + value_loss
-            
+            # log the loss
+            progress_bar.set_postfix({'loss': loss.item(), 'policy_loss': policy_loss.item(), 'value_loss': value_loss.item()})
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -155,6 +166,7 @@ class AlphaZeroParallel:
             # save the model and optimizer state for rank 0
             
             if self.model.device == torch.device('cuda:0'):
-                torch.save(self.model.state_dict(), f"model_{iteration}_{self.game}.pt")
-                torch.save(self.optimizer.state_dict(), f"optimizer_{iteration}_{self.game}.pt")
-            
+                torch.save(self.model.state_dict(), f"model0_{iteration}_{self.game}.pt")
+                torch.save(self.optimizer.state_dict(), f"optimizer0_{iteration}_{self.game}.pt")
+           
+          

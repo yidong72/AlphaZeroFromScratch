@@ -65,7 +65,7 @@ class Node:
         # child value_sum has different meanining from the parent value, beacuse the child value_sum is from the opponent's perspective
         # exception, if the parent turn is skipped, then the child value_sum is from the perspective of the current player
         if child.visit_count == 0:
-            q_value = 0
+            q_value = 0.5 # 0.5 is the prior that it can win or loss half of the time
         else:
             if not child.skip_parent:
                 q_value = 1 - ((child.value_sum / child.visit_count) + 1) / 2
@@ -123,7 +123,8 @@ class MCTS:
             while node.is_fully_expanded():
                 node = node.select()
             # value is from the perspective of the parent node (opponent piece), who just play the node.action_taken action.
-            # the piece on node.action_taken is the opponent's piece
+            # the piece on node.action_taken is the opponent's piece, 
+            # because the state is neutral perspective, so the player -1 takes the action node.action_taken
             # value is 1 if the opponent wins, -1 if the opponent loses, 0 if draw
             value, is_terminal = self.game.get_value_and_terminated(node.state, node.action_taken)
             # the value from the perspective of the current player, need to flip the sign of the value 
