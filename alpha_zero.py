@@ -32,15 +32,12 @@ class AlphaZeroParallel:
         count = 0
         # add a progress bar to show the progress of the self play
         total_stes = self.game.row_count * self.game.column_count - 4
-        # only show the progress bar for rank 0
-        if self.model.device == torch.device('cuda:0'):
-            pb = tqdm.tqdm(total=total_stes, desc='Self Play') 
+        pb = tqdm.tqdm(total=total_stes, desc=f'Self Play rank{self.model.device.index}') 
         while len(spGames) > 0:
             count += 1
-            if self.model.device == torch.device('cuda:0'):
-                pb.update(1)
-                # show number os spGames left in the progress bar
-                pb.set_postfix({'spGames': len(spGames)})
+            pb.update(1)
+            # show number os spGames left in the progress bar
+            pb.set_postfix({'spGames': len(spGames)})
             # spg.state is on the perspective of player 1 or -1, not the neutral perspective
             states = np.stack([spg.state for spg in spGames])
 
