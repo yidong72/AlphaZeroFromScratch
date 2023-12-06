@@ -49,5 +49,5 @@ def alpha_zero_work(rank, world_size):
     
     
 if __name__ == "__main__":
-    world_size = 2
+    world_size = 4
     mp.spawn(alpha_zero_work, args=(world_size,), nprocs=world_size, join=True)

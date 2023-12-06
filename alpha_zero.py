@@ -77,7 +77,9 @@ class AlphaZeroParallel:
                     for hist_neutral_state, hist_action_probs, hist_player in spg.memory:
                         # neurtal_state is on perspective of player 1
                         # memory always store the state from the perspective of player 1
-                        # so need to change the value to the perspective of the neutral player
+                        # the last piece is played by player, the value is 1 is player wins, -1 if player loses
+                        # if player wins, all the same player hist_outcome should be 1
+                        # all the different players hist_outcome should be -1
                         hist_outcome = value if hist_player == player else self.game.get_opponent_value(value)
                         # let's do the augmentation here, single the board is symmetric
                         # we can flip the board and the action_probs and rotate the board and the action_probs

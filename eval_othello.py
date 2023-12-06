@@ -54,7 +54,7 @@ args = {
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = ResNet(game, 9, 128, device)
-model.load_state_dict(torch.load("model_0_Othello_id140213392564304.pt", map_location=device))
+model.load_state_dict(torch.load("model_5_Othello_id139744445463376.pt", map_location=device))
 model.eval()
 
 if args['search']:
