@@ -27,10 +27,10 @@ def alpha_zero_work(rank, world_size):
 
     model = ResNet(game, 9, 128, device)
     ddp_model = DDP(model, device_ids=[rank])
-    ddp_model.load_state_dict(torch.load('model0_9_Othello_id139855981312896.pt', map_location=device))
+    ddp_model.load_state_dict(torch.load('model0_3_Othello_id140702700911584.pt', map_location=device))
 
     optimizer = torch.optim.AdamW(ddp_model.parameters(), lr=0.001, weight_decay=0.001)
-    optimizer.load_state_dict(torch.load('optimizer0_9_Othello_id139855981312896.pt', map_location=device))
+    optimizer.load_state_dict(torch.load('optimizer0_3_Othello_id140702700911584.pt', map_location=device))
 
     args = {
         'C': 2,
