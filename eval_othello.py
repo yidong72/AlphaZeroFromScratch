@@ -94,17 +94,19 @@ def evaluate(player_1, player_2):
 
         if is_terminal:
             print('player', player)
-            if value == 1:
-                print(player, "won")
-            elif value == -1:
-                print(player, "loss")
+            if value * player == 1:
+                print("black won")
+            elif value * player == -1:
+                print("black loss")
             elif value == 0:
                 print("draw")
             print(get_board(state))
             # print number of black and white pieces
             print("black:", np.sum(state == 1))
             print("white:", np.sum(state == -1))
-            break
+            print("black value", value * player)
+            # return value * player, which means 1 if first player won, -1 if second player won
+            return value * player
         player = game.get_opponent(player)
 
 
