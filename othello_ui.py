@@ -107,8 +107,19 @@ class OthelloUI:
             if self.engine.can_computer_move():
                 self.play_computer_move()
             else:
-                self.player_turn_label.configure(text="Computer cannot move! Still your move...")
-                self.engine.current_turn = 1
+                if self.engine.is_game_over():
+                    self.game_over_logics()
+                else:
+                    self.player_turn_label.configure(text="Computer cannot move! Still your move...")
+                    self.engine.current_turn = 1
+    
+    def game_over_logics(self):
+        black_score, white_score = self.engine.get_score()
+        self.score_label.configure(text=f"Black: {black_score} - White: {white_score}")
+        winner = "Black" if black_score > white_score else "White"
+        if black_score == white_score:
+            winner = "Draw"
+        self.player_turn_label.configure(text=f"Game Over! Winner: {winner}")
 
     def play_computer_move(self):
         # Let AI make its move and update UI
@@ -125,12 +136,7 @@ class OthelloUI:
 
         # Check game status and update score/labels
         if self.engine.is_game_over():
-            black_score, white_score = self.engine.get_score()
-            self.score_label.configure(text=f"Black: {black_score} - White: {white_score}")
-            winner = "Black" if black_score > white_score else "White"
-            if black_score == white_score:
-                winner = "Draw"
-            self.player_turn_label.configure(text=f"Game Over! Winner: {winner}")
+            self.game_over_logics()
         else:
             # Check if the user can make a move, if not, skip user turn and let AI play again
             if not self.engine.can_player_move():
@@ -157,7 +163,7 @@ class OthelloUI:
 # Create and launch the UI
 args = {
     'C': 2,
-    'num_searches': 1024,
+    'num_searches': 512,
     'dirichlet_epsilon': 0.0,
     'dirichlet_alpha': 0.01,
     'search': True,
