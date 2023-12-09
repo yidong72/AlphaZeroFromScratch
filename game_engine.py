@@ -56,7 +56,25 @@ class GameEngine:
         policy /= np.sum(policy)
         action = int(np.argmax(policy))
         return action
-    
+
+    def can_player_move(self):
+        if self.current_turn == -1:
+            return False
+        valid = self.game.get_valid_moves(self.state, self.current_turn)
+        if np.sum(valid) > 0:
+            return True
+        else:
+            return False
+
+    def can_computer_move(self):
+        if self.current_turn == 1:
+            return False
+        valid = self.game.get_valid_moves(self.state, self.current_turn)
+        if np.sum(valid) > 0:
+            return True
+        else:
+            return False
+   
     def update_computer_board(self, action):
         self.state = self.game.get_next_state(self.state, action, self.current_turn)
         self.current_turn *= -1

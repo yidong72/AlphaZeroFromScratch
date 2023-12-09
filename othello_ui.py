@@ -40,6 +40,12 @@ class OthelloUI:
                 self.draw_square(x, y)
                 if self.engine.state[y][x] != 0:
                     self.draw_piece(self.engine.state[y][x], x, y)
+                else:
+                    # Draw a dot on the square if it's a valid move
+                    if self.engine.current_turn == 1:
+                        if self.engine.is_human_move_valid(y, x):
+                            self.canvas.create_oval(x * 50 + 20, y * 50 + 20, (x + 1) * 50 - 20, (y + 1) * 50 - 20,
+                                                    fill="black")
         # refresh the canvas
         self.canvas.update()
 
@@ -86,7 +92,11 @@ class OthelloUI:
             self.player_turn_label.configure(text=f"Computer is thinking...")
             # refresh the button to show the updated text
             self.canvas.update()
-            self.play_computer_move()
+            if self.engine.can_computer_move():
+                self.play_computer_move()
+            else:
+                self.player_turn_label.configure(text="Computer cannot move! Still your move...")
+                self.engine.current_turn = 1
 
     def play_computer_move(self):
         # Let AI make its move and update UI
@@ -103,13 +113,20 @@ class OthelloUI:
 
         # Check game status and update score/labels
         if self.engine.is_game_over():
-            black_score, white_score = self.engine.board.get_score()
+            black_score, white_score = self.engine.get_score()
             self.score_label.configure(text=f"Black: {black_score} - White: {white_score}")
             winner = "Black" if black_score > white_score else "White"
             if black_score == white_score:
                 winner = "Draw"
             self.player_turn_label.configure(text=f"Game Over! Winner: {winner}")
-            self.restart_button.configure(state="normal")
+        else:
+            # Check if the user can make a move, if not, skip user turn and let AI play again
+            if not self.engine.can_player_move():
+                self.player_turn_label.configure(text="You cannot move! Skipping turn...")
+                self.engine.current_turn = -1
+                self.play_computer_move()
+            else:
+                self.player_turn_label.configure(text="Player Turn: Black")
 
     def draw_square(self, x, y):
         # Draw a square on the canvas based on its color
