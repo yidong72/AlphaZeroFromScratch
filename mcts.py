@@ -100,12 +100,12 @@ class MCTS:
         self.game = game
         self.args = args
         self.model = model
-        
+
     @torch.no_grad()
-    def search(self, state):
+    def search_all(self, state):
         root = Node(self.game, self.args, state, visit_count=1)
         
-        policy, _ = self.model(
+        policy, return_value = self.model(
             torch.tensor(self.game.get_encoded_state(state), device=self.model.device).unsqueeze(0)
         )
         policy = torch.softmax(policy, axis=1).squeeze(0).cpu().numpy()
@@ -158,7 +158,11 @@ class MCTS:
         for child in root.children:
             action_probs[child.action_taken] = child.visit_count
         action_probs /= np.sum(action_probs)
-        return action_probs
+        return action_probs, return_value
+
+    def search(self, state):
+        policy, _ = self.search_all(state)
+        return policy
 
 
 

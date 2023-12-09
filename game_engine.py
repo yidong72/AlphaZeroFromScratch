@@ -51,11 +51,11 @@ class GameEngine:
         valid_moves = self.game.get_valid_moves(self.state, self.current_turn)
         # get neural state
         neutral_state = self.game.change_perspective(self.state, self.current_turn)
-        policy = self.mcts.search(neutral_state)
+        policy, value = self.mcts.search_all(neutral_state)
         policy *= valid_moves
         policy /= np.sum(policy)
         action = int(np.argmax(policy))
-        return action
+        return action, value
 
     def can_player_move(self):
         if self.current_turn == -1:

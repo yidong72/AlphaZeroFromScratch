@@ -28,6 +28,10 @@ class OthelloUI:
         self.score_label = tk.Label(self.root, text="Black: 2 - White: 2")
         self.score_label.pack(pady=5)
 
+        # create computer winning estimate label
+        self.winner_estimate_label = tk.Label(self.root, text="Computer Winning Estimate: 0%")
+        self.winner_estimate_label.pack(pady=5)
+
         self.previous_state = None
 
         # Bind mouse clicks to handle player moves
@@ -123,7 +127,9 @@ class OthelloUI:
 
     def play_computer_move(self):
         # Let AI make its move and update UI
-        action = self.engine.play_computer_move()
+        action, value = self.engine.play_computer_move()
+        # update the winning estimate
+        self.winner_estimate_label.configure(text=f"Computer Winning Estimate: {(value.item() + 1)/2.0  * 100:.2f}%")
         col = action % 8
         row = action // 8
         copy_state = self.engine.state.copy()
