@@ -29,8 +29,8 @@ class OthelloUI:
         self.canvas.bind("<Button-1>", self.on_click)
 
         # Initialize game state and images
-        self.images = {"black": ImageTk.PhotoImage(Image.open("black_piece.png")),
-                       "white": ImageTk.PhotoImage(Image.open("white_piece.png"))}
+        # self.images = {"black": ImageTk.PhotoImage(Image.open("black_piece.png")),
+        #                "white": ImageTk.PhotoImage(Image.open("white_piece.png"))}
         self.start_game()
 
     def update_board(self):
@@ -39,8 +39,10 @@ class OthelloUI:
         for y in range(8):
             for x in range(8):
                 self.draw_square(x, y)
-                if self.engine.board.grid[y][x] != 0:
+                if self.engine.state[y][x] != 0:
                     self.draw_piece(self.engine.state[y][x], x, y)
+        # refresh the canvas
+        self.canvas.update()
 
     def start_game(self):
         # Reset game state and UI elements
@@ -56,9 +58,10 @@ class OthelloUI:
     def on_click(self, event):
         # Get clicked square coordinates and convert to board indices
         x = event.x // 50
+        # x is the column, y is the row
         y = event.y // 50
         # Check if clicked square is valid and make the move
-        if self.engine.play_human_move(x, y):
+        if self.engine.play_human_move(y, x):
             self.update_board()
             self.play_computer_move()
 
@@ -68,7 +71,7 @@ class OthelloUI:
         self.update_board()
 
         # Check game status and update score/labels
-        if self.engine.board.is_game_over():
+        if self.engine.is_game_over():
             black_score, white_score = self.engine.board.get_score()
             self.score_label.configure(text=f"Black: {black_score} - White: {white_score}")
             winner = "Black" if black_score > white_score else "White"
@@ -90,9 +93,6 @@ class OthelloUI:
         # Draw the piece
         self.canvas.create_oval(top_left, bottom_right, fill=color)
 
-        #image = self.images[player]
-        #self.canvas.create_image(x * 50 + 25, y * 50 + 25, image=image)
-
 
 # Create and launch the UI
 args = {
@@ -105,5 +105,5 @@ args = {
 }
 
 engine = GameEngine("input_10.pt", args)
-ui = OthelloUI(None)
+ui = OthelloUI(engine)
 ui.root.mainloop()

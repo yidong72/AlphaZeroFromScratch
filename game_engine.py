@@ -38,17 +38,18 @@ class GameEngine:
     def play_computer_move(self):
         if self.current_turn == 1:
             return False
-        valid_moves = self.game.get_valid_moves(self.state, self.player)
+        valid_moves = self.game.get_valid_moves(self.state, self.current_turn)
         # get neural state
-        neutral_state = self.game.change_perspective(self.state, self.player)
+        neutral_state = self.game.change_perspective(self.state, self.current_turn)
         policy = self.mcts.search(neutral_state)
         policy *= valid_moves
         policy /= np.sum(policy)
         action = int(np.argmax(policy))
-        self.state = self.game.get_next_state(self.state, action, self.player)
+        self.state = self.game.get_next_state(self.state, action, self.current_turn)
+        self.current_turn *= -1
 
     def is_game_over(self):
-        value, is_terminal = self.game.get_value_and_terminated(self.state, action)
+        value, is_terminal = self.game.get_value_and_terminated(self.state, 27)
         return is_terminal
 
     
