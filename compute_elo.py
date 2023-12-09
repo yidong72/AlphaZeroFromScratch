@@ -116,7 +116,7 @@ battles = pd.DataFrame(objs)
 
 
 
-BOOTSTRAP_ROUNDS = 1000
+BOOTSTRAP_ROUNDS = 2000
 
 np.random.seed(42)
 bootstrap_elo_lu = get_bootstrap_result(battles, compute_elo, BOOTSTRAP_ROUNDS)
