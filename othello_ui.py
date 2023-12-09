@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from game_engine import GameEngine
+import time
 
 
 class OthelloUI:
@@ -14,10 +15,8 @@ class OthelloUI:
         self.canvas.pack(pady=10)
 
         # Create buttons for starting and restarting the game
-        self.start_button = tk.Button(self.root, text="Start Game", command=self.start_game)
+        self.start_button = tk.Button(self.root, text="Restart Game", command=self.start_game)
         self.start_button.pack(pady=5)
-        self.restart_button = tk.Button(self.root, text="Restart Game", command=self.restart_game, state="disabled")
-        self.restart_button.pack(pady=5)
 
         # Create labels for player turn and score
         self.player_turn_label = tk.Label(self.root, text="Player Turn: Black")
@@ -44,10 +43,20 @@ class OthelloUI:
         # refresh the canvas
         self.canvas.update()
 
+    def raw_update_board(self, states):
+        self.canvas.delete("all")
+        # Draw squares and pieces based on current board state
+        for y in range(8):
+            for x in range(8):
+                self.draw_square(x, y)
+                if states[y][x] != 0:
+                    self.draw_piece(states[y][x], x, y)
+        # refresh the canvas
+        self.canvas.update()
+
     def start_game(self):
         # Reset game state and UI elements
         self.engine.reset()
-        self.restart_button.configure(state="disabled")
         self.player_turn_label.configure(text="Player Turn: Black")
         self.score_label.configure(text="Black: 2 - White: 2")
         self.update_board()
@@ -61,13 +70,35 @@ class OthelloUI:
         # x is the column, y is the row
         y = event.y // 50
         # Check if clicked square is valid and make the move
+        if not self.engine.is_human_move_valid(y, x):
+            # Invalid move, show warning message
+            self.player_turn_label.configure(text="Invalid Move!")
+        else:
+            self.player_turn_label.configure(text="")
+            # place the piece and draw it
+            copy_state = self.engine.state.copy()
+            copy_state[y][x] = 1
+            self.raw_update_board(copy_state)
+            time.sleep(0.1)
+            
         if self.engine.play_human_move(y, x):
             self.update_board()
+            self.player_turn_label.configure(text=f"Computer is thinking...")
+            # refresh the button to show the updated text
+            self.canvas.update()
             self.play_computer_move()
 
     def play_computer_move(self):
         # Let AI make its move and update UI
-        self.engine.play_computer_move()
+        action = self.engine.play_computer_move()
+        col = action % 8
+        row = action // 8
+        copy_state = self.engine.state.copy()
+        copy_state[row][col] = -1
+        self.raw_update_board(copy_state)
+        time.sleep(0.1)
+        self.engine.update_computer_board(action)
+        self.player_turn_label.configure(text=f"")
         self.update_board()
 
         # Check game status and update score/labels

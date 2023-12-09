@@ -20,7 +20,17 @@ class GameEngine:
         self.state = self.game.get_initial_state()
         # 1 for human, -1 for AI
         self.current_turn = 1
-    
+
+    def is_human_move_valid(self, x, y):
+        if self.state[x, y] != 0:
+            return False
+        if self.current_turn == -1:
+            return False
+        for dir in range(8):
+            if self.game.check_valid_move(self.state, x, y, dir, self.current_turn):
+                return True
+        return False
+
     def play_human_move(self, x, y):
         if self.state[x, y] != 0:
             return False
@@ -45,6 +55,9 @@ class GameEngine:
         policy *= valid_moves
         policy /= np.sum(policy)
         action = int(np.argmax(policy))
+        return action
+    
+    def update_computer_board(self, action):
         self.state = self.game.get_next_state(self.state, action, self.current_turn)
         self.current_turn *= -1
 
