@@ -112,7 +112,7 @@ class OthelloUI:
                 else:
                     self.player_turn_label.configure(text="Computer cannot move! Still your move...")
                     self.engine.current_turn = 1
-    
+
     def game_over_logics(self):
         black_score, white_score = self.engine.get_score()
         self.score_label.configure(text=f"Black: {black_score} - White: {white_score}")
