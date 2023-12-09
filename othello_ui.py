@@ -18,11 +18,17 @@ class OthelloUI:
         self.start_button = tk.Button(self.root, text="Restart Game", command=self.start_game)
         self.start_button.pack(pady=5)
 
+        # add a button to retract the last move
+        self.retract_button = tk.Button(self.root, text="Retract Move", command=self.retract_game)
+        self.retract_button.pack(pady=5)
+
         # Create labels for player turn and score
         self.player_turn_label = tk.Label(self.root, text="Player Turn: Black")
         self.player_turn_label.pack(pady=5)
         self.score_label = tk.Label(self.root, text="Black: 2 - White: 2")
         self.score_label.pack(pady=5)
+
+        self.previous_state = None
 
         # Bind mouse clicks to handle player moves
         self.canvas.bind("<Button-1>", self.on_click)
@@ -66,9 +72,13 @@ class OthelloUI:
         self.player_turn_label.configure(text="Player Turn: Black")
         self.score_label.configure(text="Black: 2 - White: 2")
         self.update_board()
+        self.previous_state = self.engine.state.copy()
 
-    def restart_game(self):
-        self.start_game()
+    def retract_game(self):
+        ### retract the last move
+        if self.engine.current_turn == 1:
+            self.engine.state = self.previous_state.copy()
+            self.update_board()
 
     def on_click(self, event):
         # Get clicked square coordinates and convert to board indices
@@ -80,6 +90,8 @@ class OthelloUI:
             # Invalid move, show warning message
             self.player_turn_label.configure(text="Invalid Move!")
         else:
+            # save the current state for retracting
+            self.previous_state = self.engine.state.copy()
             self.player_turn_label.configure(text="")
             # place the piece and draw it
             copy_state = self.engine.state.copy()
