@@ -154,8 +154,9 @@ class OthelloUI:
     def draw_piece(self, player, x, y):
         color = "black" if player == 1 else "white"
         # Place piece image on the canvas based on player and position
-        top_left = (x * 50, y * 50)
-        bottom_right = ((x + 1) * 50, (y + 1) * 50)
+        margin = 5
+        top_left = (x * 50 + margin, y * 50 + margin)
+        bottom_right = ((x + 1) * 50 - margin, (y + 1) * 50 - margin)
         # Draw the piece
         self.canvas.create_oval(top_left, bottom_right, fill=color)
 
