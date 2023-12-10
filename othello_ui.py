@@ -177,6 +177,6 @@ args = {
     'temperature': 0,
 }
 
-engine = GameEngine("input_10.pt", args)
+engine = GameEngine("input_22.pt", args)
 ui = OthelloUI(engine)
 ui.root.mainloop()
