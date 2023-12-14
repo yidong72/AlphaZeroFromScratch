@@ -21,11 +21,17 @@ def evaluate(player_1, player_2):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = ResNet(game, 9, 128, device)
+    if player_1.split('_')[1].split('.')[0].startswith('b'):
+        model = ResNet(game, 18, 256, device)
+    else:
+        model = ResNet(game, 9, 128, device)
     model.load_state_dict(torch.load(player_1, map_location=device))
     model.eval()
 
-    model2 = ResNet(game, 9, 128, device)
+    if player_2.split('_')[1].split('.')[0].startswith('b'):
+        model2 = ResNet(game, 18, 256, device)
+    else:
+        model2 = ResNet(game, 9, 128, device)
     model2.load_state_dict(torch.load(player_2, map_location=device))
     model2.eval()
 

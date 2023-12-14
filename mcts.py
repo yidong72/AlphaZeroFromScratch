@@ -82,8 +82,6 @@ class Node:
 
                 child = Node(self.game, self.args, child_state, self, action, prob)
                 self.children.append(child)
-                
-        return child
             
     def backpropagate(self, value):
         self.value_sum += value

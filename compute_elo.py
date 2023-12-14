@@ -7,6 +7,7 @@ from collections import defaultdict
 from tqdm import tqdm
 import numpy as np
 import plotly.express as px
+import sys
 
 
 def compute_elo(battles, K=4, SCALE=400, BASE=10, INIT_RATING=1000):
@@ -53,15 +54,16 @@ if os.path.exists(score_file):
 
 files = list(pathlib.Path('.').glob('input_*.pt'))
 
-
+print(files)
 epochs = []
 for f in files:
     epoch_id = f.name.split('_')[1].split('.')[0]
-    epochs.append(int(epoch_id))
+    epochs.append(epoch_id)
 
 # sort epochs from small to large
-epochs.sort(key=lambda x: int(x))
+epochs.sort()
 print(epochs)
+sys.exit(0)
 
 # run pairwise evaluation
 for i in range(len(epochs)):

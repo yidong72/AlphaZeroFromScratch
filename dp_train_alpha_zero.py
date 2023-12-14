@@ -25,12 +25,13 @@ def alpha_zero_work(rank, world_size):
     # get cuda device of rank
     device = torch.device(f'cuda:{rank}' if torch.cuda.is_available() else 'cpu')
 
-    model = ResNet(game, 9, 128, device)
+#     model = ResNet(game, 9, 128, device)
+    model = ResNet(game, 18, 256, device)
     ddp_model = DDP(model, device_ids=[rank])
-    ddp_model.load_state_dict(torch.load('model0_3_Othello_id140702700911584.pt', map_location=device))
+#    ddp_model.load_state_dict(torch.load('model0_3_Othello_id140702700911584.pt', map_location=device))
 
     optimizer = torch.optim.AdamW(ddp_model.parameters(), lr=0.001, weight_decay=0.001)
-    optimizer.load_state_dict(torch.load('optimizer0_3_Othello_id140702700911584.pt', map_location=device))
+#    optimizer.load_state_dict(torch.load('optimizer0_3_Othello_id140702700911584.pt', map_location=device))
 
     args = {
         'C': 2,
